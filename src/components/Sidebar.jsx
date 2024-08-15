@@ -28,9 +28,9 @@ function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
                     animate={{ x: 0 }}
                     exit={{ x: -300 }}
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    className="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform md:relative md:translate-x-0 transition duration-200 ease-in-out z-20"
+                    className="bg-gray-800 text-white w-64 py-7 px-2 absolute inset-y-0 left-0 transform md:relative md:translate-x-0 transition duration-200 ease-in-out z-20 flex flex-col"
                 >
-                    <div className="flex justify-between items-center px-4">
+                    <div className="flex justify-between items-center px-4 mb-6">
                         <h2 className="text-2xl font-extrabold">Money Moves</h2>
                         <button onClick={toggleSidebar} className="md:hidden">
                             <XMarkIcon className="h-6 w-6" />
@@ -64,47 +64,45 @@ function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
                             {user.name}
                         </motion.span>
                     </div>
-                    <nav className="flex flex-col justify-between h-full">
-                        <div>
-                            {navItems.map((item) => (
-                                <motion.a
-                                    key={item.name}
-                                    href="#"
-                                    className={`block py-2.5 px-4 rounded transition duration-200 ${
-                                        activeTab === item.name ? 'bg-gray-700' : 'hover:bg-gray-700'
-                                    }`}
-                                    onClick={() => {
-                                        setActiveTab(item.name);
-                                        if (window.innerWidth < 768) toggleSidebar();
-                                    }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <div className="flex items-center">
-                                        <item.icon className="h-6 w-6 mr-3" />
-                                        {item.name}
-                                    </div>
-                                </motion.a>
-                            ))}
-                        </div>
-                        <motion.a
-                            href="#"
-                            className={`block py-2.5 px-4 rounded transition duration-200 ${
-                                activeTab === 'Settings' ? 'bg-gray-700' : 'hover:bg-gray-700'
-                            }`}
-                            onClick={() => {
-                                setActiveTab('Settings');
-                                if (window.innerWidth < 768) toggleSidebar();
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <div className="flex items-center">
-                                <Cog6ToothIcon className="h-6 w-6 mr-3" />
-                                Settings
-                            </div>
-                        </motion.a>
+                    <nav className="flex-grow">
+                        {navItems.map((item) => (
+                            <motion.a
+                                key={item.name}
+                                href="#"
+                                className={`block py-2.5 px-4 rounded transition duration-200 ${
+                                    activeTab === item.name ? 'bg-gray-700' : 'hover:bg-gray-700'
+                                }`}
+                                onClick={() => {
+                                    setActiveTab(item.name);
+                                    if (window.innerWidth < 768) toggleSidebar();
+                                }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <div className="flex items-center">
+                                    <item.icon className="h-6 w-6 mr-3" />
+                                    {item.name}
+                                </div>
+                            </motion.a>
+                        ))}
                     </nav>
+                    <motion.a
+                        href="#"
+                        className={`block py-2.5 px-4 rounded transition duration-200 ${
+                            activeTab === 'Settings' ? 'bg-gray-700' : 'hover:bg-gray-700'
+                        }`}
+                        onClick={() => {
+                            setActiveTab('Settings');
+                            if (window.innerWidth < 768) toggleSidebar();
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <div className="flex items-center">
+                            <Cog6ToothIcon className="h-6 w-6 mr-3" />
+                            Settings
+                        </div>
+                    </motion.a>
                 </motion.div>
             )}
         </AnimatePresence>
