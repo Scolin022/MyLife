@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useEffect} from 'react'
 import TransactionList from './components/TransactionList'
 import BalanceDisplay from './components/BalanceDisplay'
 import SpendingChart from './components/SpendingChart'
@@ -10,6 +10,7 @@ import CategoryManager from './components/CategoryManager'
 import BudgetManager from './components/BudgetManager'
 import ExportImportManager from './components/ExportImportManager'
 import Sidebar from './components/Sidebar'
+import UserProfile from './components/UserProfile'
 
 function App() {
     const [transactions, setTransactions] = useState([])
@@ -25,6 +26,10 @@ function App() {
     const [categories, setCategories] = useState(['Miscellaneous', 'Food', 'Entertainment'])
     const [budgets, setBudgets] = useState({})
     const [activeTab, setActiveTab] = useState('Dashboard')
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : { name: 'Guest', avatar: null };
+    });
 
     // const handleInputChange = (e) => {
     //     setNewTransaction({ ...newTransaction, [e.target.name]: e.target.value })
@@ -124,9 +129,17 @@ function App() {
         }
     }
 
+    const handleUpdateUser = (newUserData) => {
+        setUser(prevUser => {
+            const updatedUser = { ...prevUser, ...newUserData };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            return updatedUser;
+        });
+    }
+
     return (
         <div className="flex h-screen bg-gray-100">
-            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} />
             <div className="flex-1 overflow-auto">
                 <div className="container mx-auto p-6">
                     <h1 className="text-3xl font-bold mb-6">{activeTab}</h1>
@@ -197,6 +210,7 @@ function App() {
                     )}
                     {activeTab === 'Settings' && (
                         <>
+                            <UserProfile user={user} onUpdateUser={handleUpdateUser} />
                             <CategoryManager
                                 categories={categories}
                                 onAddCategory={handleAddCategory}
