@@ -13,6 +13,7 @@ import Sidebar from './components/Sidebar'
 import UserProfile from './components/UserProfile'
 import {Bars3Icon} from '@heroicons/react/24/outline'
 import GoalTracker from './components/GoalTracker'
+import DocumentsPage from './components/DocumentsPage';
 
 function App() {
     const [transactions, setTransactions] = useState([])
@@ -184,7 +185,7 @@ function App() {
                             onClick={toggleSidebar}
                             className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                         >
-                            <Bars3Icon className="h-6 w-6" />
+                            <Bars3Icon className="h-6 w-6"/>
                         </button>
                     </div>
                 </header>
@@ -233,17 +234,6 @@ function App() {
                                 <SpendingOverTime transactions={filteredTransactions}/>
                             </>
                         )}
-                        {activeTab === 'Transactions' && (
-                            <>
-                                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
-                                <FilterControls filters={filters} setFilters={setFilters} categories={categories}/>
-                                <TransactionList
-                                    transactions={filteredTransactions}
-                                    onEdit={handleEdit}
-                                    onDelete={handleDeleteConfirmation}
-                                />
-                            </>
-                        )}
                         {activeTab === 'Budget' && (
                             <BudgetManager
                                 categories={categories}
@@ -263,15 +253,29 @@ function App() {
                         {activeTab === 'Analytics' && (
                             <p>Analytics page coming soon!</p>
                         )}
+                        {activeTab === 'Transactions' && (
+                            <>
+                                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
+                                <FilterControls filters={filters} setFilters={setFilters} categories={categories}/>
+                                <TransactionList
+                                    transactions={filteredTransactions}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDeleteConfirmation}
+                                />
+                            </>
+                        )}
+                        {activeTab === 'Documents' && (
+                            <DocumentsPage/>
+                        )}
                         {activeTab === 'Settings' && (
                             <>
-                                <UserProfile user={user} onUpdateUser={handleUpdateUser} />
+                                <UserProfile user={user} onUpdateUser={handleUpdateUser}/>
                                 <CategoryManager
                                     categories={categories}
                                     onAddCategory={handleAddCategory}
                                     onDeleteCategory={handleDeleteCategory}
                                 />
-                                <ExportImportManager onExport={handleExport} onImport={handleImport} />
+                                <ExportImportManager onExport={handleExport} onImport={handleImport}/>
                             </>
                         )}
                     </div>

@@ -11,15 +11,17 @@ import {
     XMarkIcon
 } from '@heroicons/react/24/outline';
 
+import { DocumentIcon } from '@heroicons/react/24/outline';
+
 function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
     const navItems = [
         { name: 'Dashboard', icon: HomeIcon },
-        { name: 'Transactions', icon: CurrencyDollarIcon },
-        { name: 'Budget', icon: ChartPieIcon },
         { name: 'Goals', icon: FlagIcon },
+        { name: 'Budget', icon: ChartPieIcon },
         { name: 'Analytics', icon: ArrowTrendingUpIcon },
+        { name: 'Transactions', icon: CurrencyDollarIcon },
+        { name: 'Documents', icon: DocumentIcon },
     ];
-
     return (
         <AnimatePresence>
             {isOpen && (
@@ -30,12 +32,6 @@ function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     className="bg-gray-800 text-white w-64 py-7 px-2 absolute inset-y-0 left-0 transform md:relative md:translate-x-0 transition duration-200 ease-in-out z-20 flex flex-col"
                 >
-                    <div className="flex justify-between items-center px-4 mb-6">
-                        <h2 className="text-2xl font-extrabold">Money Moves</h2>
-                        <button onClick={toggleSidebar} className="md:hidden">
-                            <XMarkIcon className="h-6 w-6" />
-                        </button>
-                    </div>
                     <div className="flex items-center space-x-2 px-4 mb-6">
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
