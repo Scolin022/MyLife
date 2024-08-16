@@ -1,6 +1,7 @@
-import {useState, useMemo, useEffect} from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import TransactionList from './components/TransactionList'
 import BalanceDisplay from './components/BalanceDisplay'
+import GoalTracker from './components/GoalTracker.jsx'
 import SpendingChart from './components/SpendingChart'
 import SpendingOverTime from './components/SpendingOverTime'
 import ConfirmationModal from './components/ConfirmationModal'
@@ -11,9 +12,9 @@ import BudgetManager from './components/BudgetManager'
 import ExportImportManager from './components/ExportImportManager'
 import Sidebar from './components/Sidebar'
 import UserProfile from './components/UserProfile'
-import {Bars3Icon} from '@heroicons/react/24/outline'
-import GoalTracker from './components/GoalTracker'
-import DocumentsPage from './components/DocumentsPage';
+import Documents from './components/Documents'
+import { Bars3Icon } from '@heroicons/react/24/outline'
+import { format } from 'date-fns'
 
 function App() {
     const [transactions, setTransactions] = useState([])
@@ -168,6 +169,8 @@ function App() {
         setGoals(prevGoals => prevGoals.filter(goal => goal.id !== id))
     }
 
+    const currentDate = new Date();
+
     return (
         <div className="flex h-screen bg-gray-100 overflow-hidden">
             <Sidebar
@@ -185,7 +188,7 @@ function App() {
                             onClick={toggleSidebar}
                             className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
                         >
-                            <Bars3Icon className="h-6 w-6"/>
+                            <Bars3Icon className="h-6 w-6" />
                         </button>
                     </div>
                 </header>
@@ -193,9 +196,13 @@ function App() {
                     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                         {activeTab === 'Dashboard' && (
                             <>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold">Overview</h2>
+                                    <p className="text-xl text-gray-600">{format(currentDate, 'MMMM d, yyyy')}</p>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                     <div>
-                                        <BalanceDisplay transactions={filteredTransactions}/>
+                                        <BalanceDisplay transactions={filteredTransactions} />
                                         <form onSubmit={handleSubmit} className="mb-4">
                                             <input
                                                 type="number"
@@ -229,9 +236,20 @@ function App() {
                                             </button>
                                         </form>
                                     </div>
-                                    <SpendingChart transactions={filteredTransactions} budgets={budgets}/>
+                                    <SpendingChart transactions={filteredTransactions} budgets={budgets} />
                                 </div>
-                                <SpendingOverTime transactions={filteredTransactions}/>
+                                <SpendingOverTime transactions={filteredTransactions} />
+                            </>
+                        )}
+                        {activeTab === 'Transactions' && (
+                            <>
+                                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+                                <FilterControls filters={filters} setFilters={setFilters} categories={categories} />
+                                <TransactionList
+                                    transactions={filteredTransactions}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDeleteConfirmation}
+                                />
                             </>
                         )}
                         {activeTab === 'Budget' && (
@@ -253,29 +271,18 @@ function App() {
                         {activeTab === 'Analytics' && (
                             <p>Analytics page coming soon!</p>
                         )}
-                        {activeTab === 'Transactions' && (
-                            <>
-                                <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
-                                <FilterControls filters={filters} setFilters={setFilters} categories={categories}/>
-                                <TransactionList
-                                    transactions={filteredTransactions}
-                                    onEdit={handleEdit}
-                                    onDelete={handleDeleteConfirmation}
-                                />
-                            </>
-                        )}
                         {activeTab === 'Documents' && (
-                            <DocumentsPage/>
+                            <Documents />
                         )}
                         {activeTab === 'Settings' && (
                             <>
-                                <UserProfile user={user} onUpdateUser={handleUpdateUser}/>
+                                <UserProfile user={user} onUpdateUser={handleUpdateUser} />
                                 <CategoryManager
                                     categories={categories}
                                     onAddCategory={handleAddCategory}
                                     onDeleteCategory={handleDeleteCategory}
                                 />
-                                <ExportImportManager onExport={handleExport} onImport={handleImport}/>
+                                <ExportImportManager onExport={handleExport} onImport={handleImport} />
                             </>
                         )}
                     </div>
