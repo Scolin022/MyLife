@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
+import PasswordManager from './components/PasswordManager';
+import Planner from './components/Planner'
 import TransactionList from './components/TransactionList'
 import BalanceDisplay from './components/BalanceDisplay'
-import GoalTracker from './components/GoalTracker.jsx'
+import GoalTracker from './components/GoalTracker'
 import SpendingChart from './components/SpendingChart'
 import SpendingOverTime from './components/SpendingOverTime'
 import ConfirmationModal from './components/ConfirmationModal'
@@ -15,7 +17,6 @@ import UserProfile from './components/UserProfile'
 import Documents from './components/Documents'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
-
 function App() {
     const [transactions, setTransactions] = useState([])
     const [newTransaction, setNewTransaction] = useState({
@@ -271,8 +272,16 @@ function App() {
                         {activeTab === 'Analytics' && (
                             <p>Analytics page coming soon!</p>
                         )}
+                        {activeTab === 'Planner' && (
+                            // <div className="h-[calc(100vh-64px)]">  // Adjust 64px if your header height is different
+                            <Planner />
+                            // </div>
+                        )}
                         {activeTab === 'Documents' && (
                             <Documents />
+                        )}
+                        {activeTab === 'PasswordManager' && (
+                            <PasswordManager />
                         )}
                         {activeTab === 'Settings' && (
                             <>

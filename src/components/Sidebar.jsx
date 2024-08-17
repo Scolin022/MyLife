@@ -8,10 +8,11 @@ import {
     UserCircleIcon,
     FlagIcon,
     Cog6ToothIcon,
+    DocumentIcon,
+    CalendarIcon,
+    KeyIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-
-import { DocumentIcon } from '@heroicons/react/24/outline';
 
 function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
     const navItems = [
@@ -20,7 +21,9 @@ function Sidebar({ activeTab, setActiveTab, user, isOpen, toggleSidebar }) {
         { name: 'Budget', icon: ChartPieIcon },
         { name: 'Analytics', icon: ArrowTrendingUpIcon },
         { name: 'Transactions', icon: CurrencyDollarIcon },
+        { name: 'Planner', icon: CalendarIcon },
         { name: 'Documents', icon: DocumentIcon },
+        { name: 'PasswordManager', icon: KeyIcon },
     ];
     return (
         <AnimatePresence>
