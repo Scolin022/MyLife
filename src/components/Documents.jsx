@@ -112,7 +112,7 @@ function Documents() {
                 onDrop={handleDrop}
             >
                 <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400"/>
-                <p className="mt-2 text-sm text-gray-600">Drag and drop your receipts here, or click to select files</p>
+                <p className="mt-2 text-sm text-gray-600">Drag and drop any documents here, or click to select files</p>
                 <input
                     type="file"
                     multiple
