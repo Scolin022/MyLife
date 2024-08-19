@@ -9,11 +9,9 @@ import SpendingOverTime from './components/SpendingOverTime'
 import ConfirmationModal from './components/ConfirmationModal'
 import FilterControls from './components/FilterControls'
 import SearchBar from './components/SearchBar'
-import CategoryManager from './components/CategoryManager'
 import BudgetManager from './components/BudgetManager'
-import ExportImportManager from './components/ExportImportManager'
 import Sidebar from './components/Sidebar'
-import UserProfile from './components/UserProfile'
+import Settings from './components/Settings'
 import Documents from './components/Documents'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
@@ -285,13 +283,13 @@ function App() {
                         )}
                         {activeTab === 'Settings' && (
                             <>
-                                <UserProfile user={user} onUpdateUser={handleUpdateUser} />
-                                <CategoryManager
+                                <Settings
+                                    user={user}
+                                    onUpdateUser={handleUpdateUser}
                                     categories={categories}
                                     onAddCategory={handleAddCategory}
                                     onDeleteCategory={handleDeleteCategory}
                                 />
-                                <ExportImportManager onExport={handleExport} onImport={handleImport} />
                             </>
                         )}
                     </div>

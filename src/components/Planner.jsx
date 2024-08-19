@@ -20,7 +20,7 @@ const categories = [
 
 function Planner() {
     const { isLoaded } = useLoadScript({
-        googleMapsApiKey: "AIzaSyDJ_BWFnm1A4xhTqqdQR6Ciou-Ph-QlFU8",
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
         libraries: ["places"],
     });
 

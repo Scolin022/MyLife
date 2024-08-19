@@ -10,8 +10,7 @@ import {
     Cog6ToothIcon,
     DocumentIcon,
     CalendarIcon,
-    KeyIcon,
-    XMarkIcon
+    KeyIcon
 } from '@heroicons/react/24/outline';
 
 function Sidebar({activeTab, setActiveTab, user, isOpen, toggleSidebar}) {
