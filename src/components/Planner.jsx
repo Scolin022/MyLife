@@ -3,7 +3,7 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { PlusIcon, PencilIcon, TrashIcon, XMarkIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, PencilIcon, CalendarIcon, TrashIcon, UserIcon, BriefcaseIcon, XMarkIcon, AdjustmentsHorizontalIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { useLoadScript } from '@react-google-maps/api';
 import AddressInput from './AddressInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,6 +43,8 @@ function Planner() {
     const [selectedTags, setSelectedTags] = useState([]);
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [sidebarExpanded, setSidebarExpanded] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
     const filteredEvents = useMemo(() => {
         return events.filter(event => {
@@ -145,47 +147,75 @@ function Planner() {
 
     return (
         <div className="flex h-screen bg-gray-100">
-            {/* Sidebar */}
-            <div className={`bg-white shadow-lg transition-all duration-300 ${showSidebar ? 'w-64' : 'w-16'}`}>
+            {/* Collapsible Sidebar */}
+            <div
+                className={`bg-gray-800 text-white transition-all duration-300 ${sidebarExpanded ? 'w-64' : 'w-16'} flex flex-col`}>
                 <button
-                    onClick={() => setShowSidebar(!showSidebar)}
-                    className="w-full p-4 text-left hover:bg-gray-100"
+                    onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                    className="p-4 hover:bg-gray-700 flex items-center justify-center"
                 >
-                    {showSidebar ? <XMarkIcon className="h-6 w-6"/> : <AdjustmentsHorizontalIcon className="h-6 w-6"/>}
+                    {sidebarExpanded ? <XMarkIcon className="h-6 w-6"/> :
+                        <AdjustmentsHorizontalIcon className="h-6 w-6"/>}
                 </button>
-                {showSidebar && (
-                    <div className="p-4">
-                        <h3 className="text-lg font-semibold mb-4">Categories</h3>
-                        {categories.map(category => (
-                            <div key={category.name} className="flex items-center mb-2">
-                                <input
-                                    type="checkbox"
-                                    id={`category-${category.name}`}
-                                    checked={selectedCategories.includes(category.name)}
-                                    onChange={() => toggleCategory(category.name)}
-                                    className="mr-2"
-                                />
-                                <label htmlFor={`category-${category.name}`} className="flex items-center">
-                                    <div className="w-4 h-4 rounded-full mr-2" style={{backgroundColor: category.color}}></div>
-                                    {category.name}
-                                </label>
-                            </div>
-                        ))}
-                        <button
-                            onClick={() => setShowFilterModal(true)}
-                            className="mt-4 w-full bg-blue-500 text-white rounded-md py-2 flex items-center justify-center"
-                        >
-                            <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2"/>
-                            Advanced Filters
-                        </button>
-                    </div>
-                )}
+                <nav className="flex-1">
+                    {[
+                        {icon: <CalendarIcon className="h-5 w-5"/>, text: 'Planner'},
+                        {icon: <UserIcon className="h-5 w-5"/>, text: 'Profile'},
+                        {icon: <BriefcaseIcon className="h-5 w-5"/>, text: 'Work'},
+                        {icon: <MapPinIcon className="h-5 w-5"/>, text: 'Travel'},
+                    ].map((item, index) => (
+                        <a key={index} href="#" className="flex items-center p-4 hover:bg-gray-700">
+                            {item.icon}
+                            {sidebarExpanded && <span className="ml-3">{item.text}</span>}
+                        </a>
+                    ))}
+                </nav>
             </div>
 
             {/* Main content */}
-            <div className="flex-1 p-8">
-                <div className="bg-white rounded-lg shadow-lg p-6 h-full">
-                    <h2 className="text-3xl font-bold mb-6 text-gray-800">Your Planner</h2>
+            <div className="flex-1 p-8 overflow-hidden">
+                <div className="bg-white rounded-lg shadow-lg p-6 h-full relative">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-bold text-gray-800">Your Planner</h2>
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                        >
+                            <AdjustmentsHorizontalIcon className="h-5 w-5 inline-block mr-2"/>
+                            Filters
+                        </button>
+                    </div>
+
+                    {/* Floating Filters Panel */}
+                    <AnimatePresence>
+                        {showFilters && (
+                            <motion.div
+                                initial={{opacity: 0, y: -20}}
+                                animate={{opacity: 1, y: 0}}
+                                exit={{opacity: 0, y: -20}}
+                                className="absolute top-20 right-6 bg-white p-4 rounded-lg shadow-lg z-10"
+                            >
+                                <h3 className="font-semibold mb-2">Categories</h3>
+                                {categories.map(category => (
+                                    <div key={category.name} className="flex items-center mb-2">
+                                        <input
+                                            type="checkbox"
+                                            id={`category-${category.name}`}
+                                            checked={selectedCategories.includes(category.name)}
+                                            onChange={() => toggleCategory(category.name)}
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor={`category-${category.name}`} className="flex items-center">
+                                            <div className="w-3 h-3 rounded-full mr-2"
+                                                 style={{backgroundColor: category.color}}></div>
+                                            {category.name}
+                                        </label>
+                                    </div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <div className="mb-4">
                         <input
                             type="text"
@@ -195,9 +225,9 @@ function Planner() {
                             className="w-full px-3 py-2 border rounded-md"
                         />
                     </div>
-                    <div style={{height: 'calc(100vh - 280px)'}}>
+                    <div className="h-[calc(100%-8rem)]">
                         <Calendar
-                            components={{ event: EventComponent }}
+                            components={{event: EventComponent}}
                             localizer={localizer}
                             events={filteredEvents}
                             startAccessor="start"
@@ -213,7 +243,7 @@ function Planner() {
                             resizable
                             onEventResize={moveEvent}
                             eventPropGetter={(event) => ({
-                                style: { backgroundColor: event.color },
+                                style: {backgroundColor: event.color},
                             })}
                             popup
                             showMultiDayTimes
@@ -224,7 +254,7 @@ function Planner() {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal (keep your existing modal code) */}
             <AnimatePresence>
                 {showModal && (
                     <motion.div
@@ -243,13 +273,15 @@ function Planner() {
                         >
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-2xl font-bold">{isEditing ? 'Edit Event' : 'Add New Event'}</h3>
-                                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+                                <button onClick={() => setShowModal(false)}
+                                        className="text-gray-500 hover:text-gray-700">
                                     <XMarkIcon className="h-6 w-6"/>
                                 </button>
                             </div>
                             <form onSubmit={handleEventAdd} className="space-y-4">
                                 <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Event Title</label>
+                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Event
+                                        Title</label>
                                     <input
                                         type="text"
                                         id="title"
@@ -263,7 +295,8 @@ function Planner() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date</label>
+                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start
+                                            Date</label>
                                         <input
                                             type="date"
                                             id="startDate"
@@ -280,7 +313,8 @@ function Planner() {
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start Time</label>
+                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start
+                                            Time</label>
                                         <input
                                             type="time"
                                             id="startTime"
@@ -300,7 +334,8 @@ function Planner() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
+                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End
+                                            Date</label>
                                         <input
                                             type="date"
                                             id="endDate"
@@ -317,7 +352,8 @@ function Planner() {
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End Time</label>
+                                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End
+                                            Time</label>
                                         <input
                                             type="time"
                                             id="endTime"
@@ -335,7 +371,8 @@ function Planner() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+                                    <label htmlFor="description"
+                                           className="block text-sm font-medium text-gray-700">Description</label>
                                     <textarea
                                         id="description"
                                         name="description"
@@ -347,7 +384,10 @@ function Planner() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">Location</label>
+                                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                                        <MapPinIcon className="inline h-5 w-5 mr-1"/>
+                                        Location
+                                    </label>
                                     {isLoaded ? (
                                         <AddressInput
                                             value={newEvent.location}
