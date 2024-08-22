@@ -1,20 +1,21 @@
 import { useState, useMemo, useEffect } from 'react'
-import PasswordManager from './components/PasswordManager';
-import Planner from './components/Planner'
-import TransactionList from './components/TransactionList'
-import BalanceDisplay from './components/BalanceDisplay'
-import GoalTracker from './components/GoalTracker'
-import SpendingChart from './components/SpendingChart'
-import SpendingOverTime from './components/SpendingOverTime'
-import ConfirmationModal from './components/ConfirmationModal'
-import FilterControls from './components/FilterControls'
-import SearchBar from './components/SearchBar'
-import BudgetManager from './components/BudgetManager'
-import Sidebar from './components/Sidebar'
-import Settings from './components/Settings'
-import Documents from './components/Documents'
+import PasswordManager from './features/password-manager/PasswordManager.jsx';
+import Planner from './features/planner/Planner.jsx'
+import TransactionList from './features/transactions/TransactionList.jsx'
+import BalanceDisplay from './features/dashboard/BalanceDisplay.jsx'
+import GoalTracker from './features/goals/GoalTracker.jsx'
+import SpendingChart from './features/analytics/SpendingChart.jsx'
+import SpendingOverTime from './features/analytics/SpendingOverTime.jsx'
+import ConfirmationModal from './features/common/ConfirmationModal.jsx'
+import FilterControls from './features/common/FilterControls.jsx'
+import SearchBar from './features/common/SearchBar.jsx'
+import BudgetManager from './features/budget/BudgetManager.jsx'
+import Sidebar from './features/common/Sidebar.jsx'
+import Settings from './features/settings/Settings.jsx'
+import Documents from './features/documents/Documents.jsx'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { format } from 'date-fns'
+
 function App() {
     const [transactions, setTransactions] = useState([])
     const [newTransaction, setNewTransaction] = useState({

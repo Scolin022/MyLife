@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import UserProfile from './UserProfile';
-import CategoryManager from './CategoryManager';
+import UserProfile from './UserProfile.jsx';
+import CategoryManager from './CategoryManager.jsx';
 // import ExportImportManager from './ExportImportManager';
 
 function Settings({ user, onUpdateUser, categories, onAddCategory, onDeleteCategory }) {

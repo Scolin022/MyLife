@@ -5,8 +5,9 @@ import enUS from 'date-fns/locale/en-US';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { PlusIcon, PencilIcon, CalendarIcon, TrashIcon, UserIcon, BriefcaseIcon, XMarkIcon, AdjustmentsHorizontalIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { useLoadScript } from '@react-google-maps/api';
-import AddressInput from './AddressInput';
+import AddressInput from '../planner/AddressInput';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRecurringEvents } from '../planner/hooks/useRecurringEvents';
 
 const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
@@ -35,7 +36,9 @@ function Planner() {
         location: '',
         category: '',
         tags: [],
-        color: '#3174ad'
+        color: '#3174ad',
+        isRecurring: false,
+        recurringPattern: { frequency: 'weekly', interval: 1 }
     });
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -45,6 +48,8 @@ function Planner() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sidebarExpanded, setSidebarExpanded] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
+
+    const { createRecurringEvents, updateRecurringEvents } = useRecurringEvents();
 
     const filteredEvents = useMemo(() => {
         return events.filter(event => {
@@ -65,7 +70,9 @@ function Planner() {
             location: '',
             category: '',
             tags: [],
-            color: '#3174ad'
+            color: '#3174ad',
+            isRecurring: false,
+            recurringPattern: { frequency: 'weekly', interval: 1 }
         });
         setIsEditing(false);
         setShowModal(true);
@@ -74,11 +81,20 @@ function Planner() {
     const handleEventAdd = useCallback((e) => {
         e.preventDefault();
         if (isEditing) {
-            setEvents(events => events.map(event =>
-                event.id === selectedEvent.id ? { ...newEvent, id: selectedEvent.id } : event
-            ));
+            if (newEvent.isRecurring) {
+                updateRecurringEvents(newEvent, new Date());
+            } else {
+                setEvents(events => events.map(event =>
+                    event.id === selectedEvent.id ? { ...newEvent, id: selectedEvent.id } : event
+                ));
+            }
         } else {
-            setEvents(events => [...events, { ...newEvent, id: Date.now() }]);
+            if (newEvent.isRecurring) {
+                const recurringEvents = createRecurringEvents(newEvent);
+                setEvents(events => [...events, ...recurringEvents]);
+            } else {
+                setEvents(events => [...events, { ...newEvent, id: Date.now() }]);
+            }
         }
         setShowModal(false);
         setNewEvent({
@@ -89,11 +105,13 @@ function Planner() {
             location: '',
             category: '',
             tags: [],
-            color: '#3174ad'
+            color: '#3174ad',
+            isRecurring: false,
+            recurringPattern: { frequency: 'weekly', interval: 1 }
         });
         setSelectedEvent(null);
         setIsEditing(false);
-    }, [isEditing, newEvent, selectedEvent]);
+    }, [isEditing, newEvent, selectedEvent, createRecurringEvents, updateRecurringEvents]);
 
     const handleSelectEvent = useCallback((event) => {
         setSelectedEvent(event);
@@ -154,8 +172,7 @@ function Planner() {
                     onClick={() => setSidebarExpanded(!sidebarExpanded)}
                     className="p-4 hover:bg-gray-700 flex items-center justify-center"
                 >
-                    {sidebarExpanded ? <XMarkIcon className="h-6 w-6"/> :
-                        <AdjustmentsHorizontalIcon className="h-6 w-6"/>}
+                    {sidebarExpanded ? <XMarkIcon className="h-6 w-6"/> : <AdjustmentsHorizontalIcon className="h-6 w-6"/>}
                 </button>
                 <nav className="flex-1">
                     {[
@@ -254,7 +271,7 @@ function Planner() {
                 </div>
             </div>
 
-            {/* Modal (keep your existing modal code) */}
+            {/* Modal */}
             <AnimatePresence>
                 {showModal && (
                     <motion.div
@@ -273,15 +290,13 @@ function Planner() {
                         >
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-2xl font-bold">{isEditing ? 'Edit Event' : 'Add New Event'}</h3>
-                                <button onClick={() => setShowModal(false)}
-                                        className="text-gray-500 hover:text-gray-700">
+                                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
                                     <XMarkIcon className="h-6 w-6"/>
                                 </button>
                             </div>
                             <form onSubmit={handleEventAdd} className="space-y-4">
                                 <div>
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Event
-                                        Title</label>
+                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Event Title</label>
                                     <input
                                         type="text"
                                         id="title"
@@ -295,8 +310,7 @@ function Planner() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start
-                                            Date</label>
+                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Start Date</label>
                                         <input
                                             type="date"
                                             id="startDate"
@@ -313,8 +327,7 @@ function Planner() {
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start
-                                            Time</label>
+                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Start Time</label>
                                         <input
                                             type="time"
                                             id="startTime"
@@ -334,8 +347,7 @@ function Planner() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End
-                                            Date</label>
+                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">End Date</label>
                                         <input
                                             type="date"
                                             id="endDate"
@@ -352,8 +364,7 @@ function Planner() {
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End
-                                            Time</label>
+                                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">End Time</label>
                                         <input
                                             type="time"
                                             id="endTime"
@@ -371,8 +382,7 @@ function Planner() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label htmlFor="description"
-                                           className="block text-sm font-medium text-gray-700">Description</label>
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
                                     <textarea
                                         id="description"
                                         name="description"
@@ -440,6 +450,52 @@ function Planner() {
                                     />
                                 </div>
 
+                                <div>
+                                    <label className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={newEvent.isRecurring}
+                                            onChange={(e) => setNewEvent({...newEvent, isRecurring: e.target.checked})}
+                                            className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Recurring Event</span>
+                                    </label>
+                                </div>
+
+                                {newEvent.isRecurring && (
+                                    <div className="space-y-2">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Frequency</label>
+                                            <select
+                                                value={newEvent.recurringPattern.frequency}
+                                                onChange={(e) => setNewEvent({
+                                                    ...newEvent,
+                                                    recurringPattern: {...newEvent.recurringPattern, frequency: e.target.value}
+                                                })}
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            >
+                                                <option value="daily">Daily</option>
+                                                <option value="weekly">Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                                <option value="yearly">Yearly</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Interval</label>
+                                            <input
+                                                type="number"
+                                                value={newEvent.recurringPattern.interval}
+                                                onChange={(e) => setNewEvent({
+                                                    ...newEvent,
+                                                    recurringPattern: {...newEvent.recurringPattern, interval: parseInt(e.target.value)}
+                                                })}
+                                                min="1"
+                                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="flex justify-end space-x-2">
                                     {isEditing && (
                                         <button
@@ -483,7 +539,9 @@ function Planner() {
                         location: '',
                         category: '',
                         tags: [],
-                        color: '#3174ad'
+                        color: '#3174ad',
+                        isRecurring: false,
+                        recurringPattern: { frequency: 'weekly', interval: 1 }
                     });
                     setIsEditing(false);
                     setShowModal(true);

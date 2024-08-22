@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-dom-confetti';
+import { DollarSign, Calendar, Target, Flag } from 'lucide-react';
 
 const GOAL_TYPES = {
     FINANCIAL: 'financial',
@@ -159,20 +160,72 @@ function GoalForm({ onSubmit, goalTypes }) {
     );
 }
 
+// function GoalItem({ goal, updateGoal, deleteGoal, isCelebrating }) {
+//     const renderGoalContent = () => {
+//         switch(goal.type) {
+//             case GOAL_TYPES.FINANCIAL:
+//                 const progress = (goal.currentAmount / goal.targetAmount) * 100;
+//                 return (
+//                     <>
+//                         <p>Target: ${goal.targetAmount}</p>
+//                         <p>Current: ${goal.currentAmount}</p>
+//                         <div className="mt-2 bg-gray-200 rounded-full h-2.5">
+//                             <div
+//                                 className="bg-blue-600 h-2.5 rounded-full"
+//                                 style={{ width: `${progress}%` }}
+//                             ></div>
+//                         </div>
+//                         <input
+//                             type="number"
+//                             placeholder="Add progress"
+//                             className="mt-2 p-1 border rounded mr-2"
+//                             onKeyPress={(e) => {
+//                                 if (e.key === 'Enter') {
+//                                     updateGoal(goal.id, { currentAmount: parseFloat(goal.currentAmount) + parseFloat(e.target.value) });
+//                                     e.target.value = '';
+//                                 }
+//                             }}
+//                         />
+//                     </>
+//                 );
 function GoalItem({ goal, updateGoal, deleteGoal, isCelebrating }) {
+    const [progressAnimation, setProgressAnimation] = useState(0);
+
+    useEffect(() => {
+        if (goal.type === GOAL_TYPES.FINANCIAL) {
+            const progress = (goal.currentAmount / goal.targetAmount) * 100;
+            setProgressAnimation(progress);
+        }
+    }, [goal.currentAmount, goal.targetAmount, goal.type]);
+
+    const renderGoalIcon = () => {
+        switch(goal.type) {
+            case GOAL_TYPES.FINANCIAL:
+                return <DollarSign className="text-green-500" />;
+            case GOAL_TYPES.COUNTDOWN:
+            case GOAL_TYPES.DATE_SPECIFIC:
+                return <Calendar className="text-blue-500" />;
+            case GOAL_TYPES.GENERAL:
+                return <Flag className="text-purple-500" />;
+            default:
+                return <Target className="text-gray-500" />;
+        }
+    };
+
     const renderGoalContent = () => {
         switch(goal.type) {
             case GOAL_TYPES.FINANCIAL:
-                const progress = (goal.currentAmount / goal.targetAmount) * 100;
                 return (
                     <>
                         <p>Target: ${goal.targetAmount}</p>
                         <p>Current: ${goal.currentAmount}</p>
-                        <div className="mt-2 bg-gray-200 rounded-full h-2.5">
-                            <div
-                                className="bg-blue-600 h-2.5 rounded-full"
-                                style={{ width: `${progress}%` }}
-                            ></div>
+                        <div className="mt-2 bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                            <motion.div
+                                className="bg-blue-600 h-2.5"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progressAnimation}%` }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                            ></motion.div>
                         </div>
                         <input
                             type="number"
@@ -210,14 +263,19 @@ function GoalItem({ goal, updateGoal, deleteGoal, isCelebrating }) {
             animate={{opacity: 1, y: 0}}
             transition={{duration: 0.5}}
         >
-            <h3 className="text-xl font-semibold">{goal.name}</h3>
+            <div className="flex items-center mb-2">
+                {renderGoalIcon()}
+                <h3 className="text-xl font-semibold ml-2">{goal.name}</h3>
+            </div>
             {renderGoalContent()}
-            <button
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => deleteGoal(goal.id)}
                 className="mt-2 bg-red-500 text-white p-1 rounded hover:bg-red-600 transition"
             >
                 Delete
-            </button>
+            </motion.button>
             <AnimatePresence>
                 {isCelebrating && (
                     <motion.div
