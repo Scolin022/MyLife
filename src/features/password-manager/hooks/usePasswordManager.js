@@ -92,25 +92,13 @@ function usePasswordManager() {
         setEditPassword({ ...editPassword, password: newGeneratedPassword });
     };
 
-    const copyToClipboard = (text, type) => {
-        navigator.clipboard.writeText(text).then(() => {
-            toast.success(`Password copied!`, {
-                duration: 2000,
-                position: 'bottom-center',
-                icon: '✅',
-                style: {
-                    borderRadius: '8px',
-                    padding: '16px',
-                    color: '#fff',
-                    background: '#4a5568',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                },
-            });
-        }, (err) => {
-            console.error('Could not copy text: ', err);
-            toast.error(`Failed to copy ${type.toLowerCase()}`);
-        });
-    };
+    // const copyToClipboard = (text, type) => {
+    //     navigator.clipboard.writeText(text).then(() => {
+    //     }, (err) => {
+    //         console.error('Could not copy text: ', err);
+    //         toast.error(`Failed to copy ${type.toLowerCase()}`);
+    //     });
+    // };
 
     const handleNotesClick = (password) => {
         setSelectedPassword(password);
@@ -163,7 +151,6 @@ function usePasswordManager() {
         saveEdit,
         handleGeneratePassword,
         handleGenerateEditPassword,
-        copyToClipboard,
         handleNotesClick,
         handleNotesChange,
         saveNotes,

@@ -5,6 +5,18 @@ import usePasswordManager from './hooks/usePasswordManager';
 import { Toaster, toast } from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
+const CustomToast = ({ message }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 50 }}
+        className="bg-gray-700 text-white rounded-lg p-3 shadow-lg flex items-center"
+    >
+        <CheckIcon className="h-5 w-5 mr-2" />
+        {message}
+    </motion.div>
+);
+
 function PasswordManager() {
     const {
         passwords,
@@ -16,7 +28,6 @@ function PasswordManager() {
         handleDelete,
         toggleShowPassword,
         handleGeneratePassword,
-        copyToClipboard,
         setNewPassword,
         setPasswordLength,
         passwordLength,
@@ -41,16 +52,20 @@ function PasswordManager() {
         pw.phone?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleCopy = (text, field, pwId) => {
-        copyToClipboard(text, field);
-        setCopiedFields({ ...copiedFields, [pwId]: { ...copiedFields[pwId], [field]: true } });
-        setTimeout(() => {
-            setCopiedFields({ ...copiedFields, [pwId]: { ...copiedFields[pwId], [field]: false } });
-        }, 2000);
-        toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} copied!`, {
-            duration: 2000,
-            icon: '✅',
-        });
+    const handleCopy = async (text, field, pwId) => {
+        const success = await copyToClipboard(text, field);
+        if (success) {
+            setCopiedFields({ ...copiedFields, [pwId]: { ...copiedFields[pwId], [field]: true } });
+            setTimeout(() => {
+                setCopiedFields({ ...copiedFields, [pwId]: { ...copiedFields[pwId], [field]: false } });
+            }, 2000);
+
+            toast.custom((t) => (
+                <CustomToast message={`${field.charAt(0).toUpperCase() + field.slice(1)} copied!`} />
+            ), {
+                duration: 2000,
+            });
+        }
     };
 
     const toggleExpand = (pwId) => {
@@ -81,8 +96,17 @@ function PasswordManager() {
 
     return (
         <div className="max-w-4xl mx-auto py-8">
-            <Toaster/>
-            <h2 className="text-3xl font-bold mb-6">Password Manager</h2>
+            <Toaster
+                position="bottom-center"
+                toastOptions={{
+                    duration: 2000,
+                    style: {
+                        background: 'transparent',
+                        boxShadow: 'none',
+                    },
+                }}
+            />
+            <h2 className="text-3xl font-bold mb-6">Your Accounts</h2>
 
             <div className="mb-4">
                 <input
