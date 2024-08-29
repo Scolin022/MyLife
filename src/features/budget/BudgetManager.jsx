@@ -1,20 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, DollarSign, AlertCircle } from 'lucide-react';
+import { db, auth } from './../../firebase.js'; // Import Firebase configuration
+import { collection, doc, setDoc, onSnapshot, query, where } from 'firebase/firestore';
 
-function BudgetManager({ categories, budgets, onSetBudget, getCategorySpending }) {
+function BudgetManager({ categories, getCategorySpending }) {
+    const [budgets, setBudgets] = useState({});
     const [selectedCategory, setSelectedCategory] = useState('');
     const [budgetAmount, setBudgetAmount] = useState('');
     const [showAlert, setShowAlert] = useState(false);
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
+            const q = query(collection(db, 'budgets'), where('userId', '==', user.uid));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const budgetData = {};
+                snapshot.forEach(doc => {
+                    budgetData[doc.id] = doc.data().amount;
+                });
+                setBudgets(budgetData);
+            });
+            return () => unsubscribe();
+        }
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (selectedCategory && budgetAmount) {
-            onSetBudget(selectedCategory, Number(budgetAmount));
-            setBudgetAmount('');
-            setSelectedCategory('');
-            setShowAlert(true);
-            setTimeout(() => setShowAlert(false), 3000);
+            const user = auth.currentUser;
+            if (user) {
+                const budgetRef = doc(db, 'budgets', selectedCategory);
+                await setDoc(budgetRef, {
+                    amount: Number(budgetAmount),
+                    userId: user.uid
+                }, { merge: true });
+                setBudgetAmount('');
+                setSelectedCategory('');
+                setShowAlert(true);
+                setTimeout(() => setShowAlert(false), 3000);
+            }
         }
     };
 

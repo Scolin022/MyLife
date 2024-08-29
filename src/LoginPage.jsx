@@ -3,7 +3,7 @@ import { auth } from './firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { motion } from 'framer-motion';
 
-function LoginPage({ onLogin }) {
+function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
@@ -16,7 +16,7 @@ function LoginPage({ onLogin }) {
             } else {
                 await signInWithEmailAndPassword(auth, email, password);
             }
-            onLogin();
+            // No need to call onLogin here, the App component will handle the state change
         } catch (error) {
             console.error("Error during authentication: ", error);
             alert(error.message);

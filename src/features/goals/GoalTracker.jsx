@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-dom-confetti';
 import { DollarSign, Calendar, Target, Flag } from 'lucide-react';
+import { db, auth } from './../../firebase.js';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
 
 const GOAL_TYPES = {
     FINANCIAL: 'financial',
@@ -27,14 +29,28 @@ function GoalTracker() {
     const [goals, setGoals] = useState([]);
     const [celebratingGoal, setCelebratingGoal] = useState(null);
 
-    const addGoal = (newGoal) => {
-        setGoals([...goals, { ...newGoal, id: Date.now() }]);
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
+            const q = query(collection(db, 'goals'), where('userId', '==', user.uid));
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const goalsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setGoals(goalsData);
+            });
+            return () => unsubscribe();
+        }
+    }, []);
+
+    const addGoal = async (newGoal) => {
+        const user = auth.currentUser;
+        if (user) {
+            await addDoc(collection(db, 'goals'), { ...newGoal, userId: user.uid });
+        }
     };
 
-    const updateGoal = (id, updatedData) => {
-        setGoals(goals.map(goal =>
-            goal.id === id ? { ...goal, ...updatedData } : goal
-        ));
+    const updateGoal = async (id, updatedData) => {
+        const goalRef = doc(db, 'goals', id);
+        await updateDoc(goalRef, updatedData);
 
         const updatedGoal = goals.find(goal => goal.id === id);
         if (updatedGoal && updatedGoal.type === GOAL_TYPES.FINANCIAL) {
@@ -44,8 +60,8 @@ function GoalTracker() {
         }
     };
 
-    const deleteGoal = (id) => {
-        setGoals(goals.filter(goal => goal.id !== id));
+    const deleteGoal = async (id) => {
+        await deleteDoc(doc(db, 'goals', id));
     };
 
     useEffect(() => {
@@ -160,34 +176,6 @@ function GoalForm({ onSubmit, goalTypes }) {
     );
 }
 
-// function GoalItem({ goal, updateGoal, deleteGoal, isCelebrating }) {
-//     const renderGoalContent = () => {
-//         switch(goal.type) {
-//             case GOAL_TYPES.FINANCIAL:
-//                 const progress = (goal.currentAmount / goal.targetAmount) * 100;
-//                 return (
-//                     <>
-//                         <p>Target: ${goal.targetAmount}</p>
-//                         <p>Current: ${goal.currentAmount}</p>
-//                         <div className="mt-2 bg-gray-200 rounded-full h-2.5">
-//                             <div
-//                                 className="bg-blue-600 h-2.5 rounded-full"
-//                                 style={{ width: `${progress}%` }}
-//                             ></div>
-//                         </div>
-//                         <input
-//                             type="number"
-//                             placeholder="Add progress"
-//                             className="mt-2 p-1 border rounded mr-2"
-//                             onKeyPress={(e) => {
-//                                 if (e.key === 'Enter') {
-//                                     updateGoal(goal.id, { currentAmount: parseFloat(goal.currentAmount) + parseFloat(e.target.value) });
-//                                     e.target.value = '';
-//                                 }
-//                             }}
-//                         />
-//                     </>
-//                 );
 function GoalItem({ goal, updateGoal, deleteGoal, isCelebrating }) {
     const [progressAnimation, setProgressAnimation] = useState(0);
 

@@ -41,6 +41,26 @@ function App() {
     const [user, setUser] = useState(null)
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                fetchTransactions();
+            }
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+
+    useEffect(() => {
+        if (user) {
+            fetchTransactions();
+        }
+    }, [user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -90,23 +110,14 @@ function App() {
 
     const fetchTransactions = async () => {
         if (!user) return;
-        const querySnapshot = await getDocs(query(collection(db, 'transactions'), where("userId", "==", user.uid)));
+        const q = query(collection(db, 'transactions'), where("userId", "==", user.uid));
+        const querySnapshot = await getDocs(q);
         const fetchedTransactions = querySnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
         setTransactions(fetchedTransactions);
     };
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
-            if (user) {
-                fetchTransactions();
-            }
-        });
-        return () => unsubscribe();
-    }, []);
 
     const filteredTransactions = useMemo(() => {
         return transactions.filter(tx => {
@@ -224,7 +235,9 @@ function App() {
 
     return (
         <>
-            {user ? (
+            {loading ? (
+                <div>Loading...</div>
+            ) : user ? (
                 <div className="flex h-screen bg-gray-100 overflow-hidden">
                     <Sidebar
                         activeTab={activeTab}
@@ -351,7 +364,7 @@ function App() {
                                     <p>Analytics page coming soon!</p>
                                 )}
                                 {activeTab === 'Planner' && (
-                                    <Planner/>
+                                    <Planner user={user}/>
                                 )}
                                 {activeTab === 'Documents' && (
                                     <Documents/>
@@ -382,7 +395,7 @@ function App() {
                     />
                 </div>
             ) : (
-                <LoginPage onLogin={() => {}} />
+                <LoginPage />
             )}
         </>
     );
